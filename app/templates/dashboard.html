@@ -2,6 +2,25 @@
 {% block content %}
     <div class="content-section">
         <legend class="border-bottom mb-4">Dashboard</legend>
+
+        <!-- Pie Charts Row -->
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <h5 class="text-center">Overall Instrument Status</h5>
+                <canvas id="instrumentStatusChart"></canvas>
+            </div>
+            <div class="col-md-4">
+                <h5 class="text-center">Today's Transactions</h5>
+                <canvas id="dailyTransactionsChart"></canvas>
+            </div>
+            <div class="col-md-4">
+                <h5 class="text-center">Problematic Transactions</h5>
+                <canvas id="problematicTransactionsChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Detailed Report Table -->
+        <legend class="border-top pt-4 mb-4">Detailed Unit Report</legend>
         <table class="table table-striped">
             <thead>
                 <tr>
@@ -26,3 +45,62 @@
         </table>
     </div>
 {% endblock content %}
+
+{% block scripts %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // 1. Instrument Status Chart
+    const instrumentStatusCtx = document.getElementById('instrumentStatusChart');
+    new Chart(instrumentStatusCtx, {
+      type: 'pie',
+      data: {
+        labels: {{ instrument_status_labels|tojson }},
+        datasets: [{
+          label: 'Instrument Status',
+          data: {{ instrument_status_values|tojson }},
+          backgroundColor: [
+            'rgba(75, 192, 192, 0.7)',
+            'rgba(255, 205, 86, 0.7)',
+            'rgba(255, 99, 132, 0.7)',
+            'rgba(54, 162, 235, 0.7)'
+          ]
+        }]
+      }
+    });
+
+    // 2. Daily Transactions Chart
+    const dailyTransactionsCtx = document.getElementById('dailyTransactionsChart');
+    new Chart(dailyTransactionsCtx, {
+      type: 'pie',
+      data: {
+        labels: ['Loans & Distributions', 'Returns'],
+        datasets: [{
+          label: 'Today\'s Transactions',
+          data: [{{ todays_loans_count }}, {{ todays_returns_count }}],
+          backgroundColor: [
+            'rgba(54, 162, 235, 0.7)',
+            'rgba(255, 159, 64, 0.7)'
+          ]
+        }]
+      }
+    });
+
+    // 3. Problematic Transactions Chart
+    const problematicTransactionsCtx = document.getElementById('problematicTransactionsChart');
+    new Chart(problematicTransactionsCtx, {
+      type: 'pie',
+      data: {
+        labels: ['Outstanding', 'Incomplete/Damaged'],
+        datasets: [{
+          label: 'Problematic Transactions',
+          data: [{{ total_outstanding }}, {{ total_incomplete_damaged }}],
+          backgroundColor: [
+            'rgba(255, 99, 132, 0.7)',
+            'rgba(153, 102, 255, 0.7)'
+          ]
+        }]
+      }
+    });
+  });
+</script>
+{% endblock %}

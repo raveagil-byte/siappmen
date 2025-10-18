@@ -159,16 +159,12 @@ def get_transaction_by_qr(qr_code):
         })
     return jsonify({'error': 'Transaction not found'}), 404
 
+from sqlalchemy import func
+
 @main.route("/dashboard")
 @login_required
 def dashboard():
-    # Report:
-    # - nama unit
-    # - jumlah instrumen kotor setiap hari (today's returns)
-    # - pengiriman instrumen steril (today's loans/distributions)
-    # - jumlah instrumen yang belum balik ke CSSD (outstanding loans)
-    # - serta jumlah alat yang tidak komplit. (incomplete/damaged returns)
-
+    # --- Table Report Data ---
     today = datetime.utcnow().date()
     start_of_day = datetime.combine(today, datetime.min.time())
     end_of_day = datetime.combine(today, datetime.max.time())
@@ -207,7 +203,29 @@ def dashboard():
             'incomplete_returns': incomplete_returns
         })
 
-    return render_template('dashboard.html', title='Dashboard', report_data=report_data)
+    # --- Pie Chart Data ---
+    # 1. Overall Instrument Status
+    instrument_status_data = db.session.query(Instrument.status, func.count(Instrument.id)).group_by(Instrument.status).all()
+    instrument_status_labels = [status[0] for status in instrument_status_data]
+    instrument_status_values = [status[1] for status in instrument_status_data]
+
+    # 2. Today's Transactions
+    todays_loans_count = Transaction.query.filter(Transaction.loan_date >= start_of_day, Transaction.loan_date <= end_of_day).count()
+    todays_returns_count = Transaction.query.filter(Transaction.return_date >= start_of_day, Transaction.return_date <= end_of_day).count()
+
+    # 3. Problematic Transactions
+    total_outstanding = Transaction.query.filter(Transaction.status.in_(['loaned', 'distributed'])).count()
+    total_incomplete_damaged = Transaction.query.filter(Transaction.completeness_status.in_(['incomplete', 'damaged'])).count()
+
+
+    return render_template('dashboard.html', title='Dashboard',
+                           report_data=report_data,
+                           instrument_status_labels=instrument_status_labels,
+                           instrument_status_values=instrument_status_values,
+                           todays_loans_count=todays_loans_count,
+                           todays_returns_count=todays_returns_count,
+                           total_outstanding=total_outstanding,
+                           total_incomplete_damaged=total_incomplete_damaged)
 
 @main.route("/distribute/new", methods=['GET', 'POST'])
 @login_required

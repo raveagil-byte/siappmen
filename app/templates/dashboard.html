@@ -21,9 +21,10 @@
 
         <!-- Detailed Report Table -->
         <legend class="border-top pt-4 mb-4">Detailed Unit Report</legend>
-        <table class="table table-striped">
-            <thead>
-                <tr>
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
                     <th scope="col">Unit Name</th>
                     <th scope="col">Today's Returns (Dirty)</th>
                     <th scope="col">Today's Loans/Distributions (Sterile)</th>
@@ -42,7 +43,8 @@
                 </tr>
                 {% endfor %}
             </tbody>
-        </table>
+            </table>
+        </div>
     </div>
 {% endblock content %}
 

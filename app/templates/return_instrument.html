@@ -1,0 +1,62 @@
+{% extends "layout.html" %}
+{% block content %}
+    <div class="content-section">
+        <form method="POST" action="">
+            {{ form.hidden_tag() }}
+            <fieldset class="form-group">
+                <legend class="border-bottom mb-4">Return Instrument</legend>
+                <div class="form-group">
+                    {{ form.qr_code.label(class="form-control-label") }}
+                    <div class="input-group">
+                        {{ form.qr_code(class="form-control form-control-lg", id="qr_code_input") }}
+                        <div class="input-group-append">
+                            <a href="{{ url_for('main.scan') }}" class="btn btn-outline-secondary">Scan QR</a>
+                        </div>
+                    </div>
+                </div>
+                <div id="transaction_details"></div>
+                <div class="form-group">
+                    {{ form.completeness_status.label(class="form-control-label") }}
+                    {{ form.completeness_status(class="form-control form-control-lg") }}
+                </div>
+                <div class="form-group">
+                    {{ form.return_notes.label(class="form-control-label") }}
+                    {{ form.return_notes(class="form-control form-control-lg") }}
+                </div>
+            </fieldset>
+            <div class="form-group">
+                {{ form.submit(class="btn btn-outline-info") }}
+            </div>
+        </form>
+    </div>
+{% endblock content %}
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const qrCodeInput = document.getElementById('qr_code_input');
+        const transactionDetails = document.getElementById('transaction_details');
+
+        qrCodeInput.addEventListener('change', function() {
+            const qrCode = this.value;
+            if (qrCode) {
+                fetch(`/get_transaction_by_qr/${qrCode}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.error) {
+                            transactionDetails.innerHTML = `<p class="text-danger">${data.error}</p>`;
+                        } else {
+                            transactionDetails.innerHTML = `
+                                <p><strong>Instrument:</strong> ${data.instrument}</p>
+                                <p><strong>Unit:</strong> ${data.unit}</p>
+                                <p><strong>Loan Date:</strong> ${data.loan_date}</p>
+                                <p><strong>Status:</strong> ${data.status}</p>
+                            `;
+                        }
+                    });
+            } else {
+                transactionDetails.innerHTML = '';
+            }
+        });
+    });
+</script>
+{% endblock %}

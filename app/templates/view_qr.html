@@ -1,0 +1,16 @@
+{% extends "layout.html" %}
+{% block content %}
+    <div class="content-section">
+        <h2 class="border-bottom mb-4">Transaction QR Code</h2>
+        <p>Scan the QR code below to view the transaction details.</p>
+        <img src="data:image/png;base64,{{ img_str }}" alt="QR Code">
+        <p><strong>Transaction ID:</strong> {{ transaction.id }}</p>
+        <p><strong>Instrument:</strong> {{ transaction.instrument.name }}</p>
+        <p><strong>Unit:</strong> {{ transaction.unit.name }}</p>
+        <p><strong>Date:</strong> {{ transaction.loan_date.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+        <p><strong>Status:</strong> {{ transaction.status }}</p>
+        {% if transaction.status == 'distributed' %}
+            <a href="{{ url_for('main.handover', transaction_id=transaction.id) }}" class="btn btn-outline-info">Proceed to Handover</a>
+        {% endif %}
+    </div>
+{% endblock content %}

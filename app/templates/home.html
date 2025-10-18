@@ -1,0 +1,9 @@
+{% extends "layout.html" %}
+{% block content %}
+    <h1>Welcome to SiAPPMEN</h1>
+    {% if current_user.is_authenticated %}
+        <p>You are logged in as {{ current_user.username }}.</p>
+    {% else %}
+        <p>Please <a href="{{ url_for('main.login') }}">log in</a> to continue.</p>
+    {% endif %}
+{% endblock content %}

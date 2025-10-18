@@ -1,0 +1,21 @@
+{% extends "layout.html" %}
+{% block content %}
+    <div class="content-section">
+        <form method="POST" action="">
+            {{ form.hidden_tag() }}
+            <fieldset class="form-group">
+                <legend class="border-bottom mb-4">Handover</legend>
+                <p><strong>Instrument:</strong> {{ transaction.instrument.name }}</p>
+                <p><strong>Unit:</strong> {{ transaction.unit.name }}</p>
+                <p><strong>Notes:</strong> {{ transaction.notes }}</p>
+                <div class="form-group">
+                    {{ form.receiving_user_id.label(class="form-control-label") }}
+                    {{ form.receiving_user_id(class="form-control form-control-lg") }}
+                </div>
+            </fieldset>
+            <div class="form-group">
+                {{ form.submit(class="btn btn-outline-info") }}
+            </div>
+        </form>
+    </div>
+{% endblock content %}

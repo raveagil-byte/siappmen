@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: siappmen-app
+    env: python
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "gunicorn --worker-tmp-dir /dev/shm run:app"
+    plan: free # Optional: use Render's free tier
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.12 # Match the environment version
+      - key: FLASK_APP
+        value: run.py
+      - key: FLASK_DEBUG
+        value: 0 # Disable debug mode for production
+    disks:
+      - name: siappmen-db
+        mountPath: /app/instance
+        sizeGB: 1

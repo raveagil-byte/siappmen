@@ -7,6 +7,9 @@
         <p><strong>Transaction ID:</strong> {{ transaction.id }}</p>
         <p><strong>Instrument:</strong> {{ transaction.instrument.name }}</p>
         <p><strong>Unit:</strong> {{ transaction.unit.name }}</p>
+        {% if transaction.patient_name %}
+            <p><strong>Patient Name:</strong> {{ transaction.patient_name }}</p>
+        {% endif %}
         <p><strong>Date:</strong> {{ transaction.loan_date.strftime('%Y-%m-%d %H:%M:%S') }}</p>
         <p><strong>Status:</strong> {{ transaction.status }}</p>
         {% if transaction.status == 'distributed' %}

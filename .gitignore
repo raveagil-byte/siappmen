@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Instance folder
+instance/
+
+# Log files
+*.log
+
+# Jules scratchpad
+jules-scratch/
+
+# Environment
+.env
+venv/
+env/

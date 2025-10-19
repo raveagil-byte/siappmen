@@ -9,7 +9,15 @@ class RegistrationForm(FlaskForm):
     password = PasswordField('Password', validators=[DataRequired()])
     confirm_password = PasswordField('Confirm Password',
                                      validators=[DataRequired(), EqualTo('password')])
+    role = SelectField('Role', choices=[('unit_user', 'Unit User'), ('cssd_user', 'CSSD User')],
+                       validators=[DataRequired()])
+    unit_id = SelectField('Unit', coerce=int, validators=[DataRequired()])
     submit = SubmitField('Sign Up')
+
+    def __init__(self, *args, **kwargs):
+        super(RegistrationForm, self).__init__(*args, **kwargs)
+        self.unit_id.choices = [(u.id, u.name) for u in Unit.query.order_by('name').all()]
+
 
     def validate_username(self, username):
         user = User.query.filter_by(username=username.data).first()

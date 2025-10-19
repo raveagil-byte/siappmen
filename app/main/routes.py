@@ -3,6 +3,7 @@ from flask_login import login_user, current_user, logout_user, login_required
 from app import db, bcrypt
 from app.models import User, Unit, Instrument, Transaction
 from app.main.forms import RegistrationForm, LoginForm, LoanForm, ReturnForm, DistributionForm, HandoverForm
+from app.decorators import cssd_required
 import qrcode
 import uuid
 from io import BytesIO
@@ -24,7 +25,10 @@ def register():
     form = RegistrationForm()
     if form.validate_on_submit():
         hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
-        user = User(username=form.username.data, password=hashed_password)
+        user = User(username=form.username.data,
+                    password=hashed_password,
+                    role=form.role.data,
+                    unit_id=form.unit_id.data)
         db.session.add(user)
         db.session.commit()
         flash('Your account has been created! You are now able to log in', 'success')
@@ -73,6 +77,7 @@ def check_overdue_items(user):
 
 @main.route("/loan/new", methods=['GET', 'POST'])
 @login_required
+@cssd_required
 def new_loan():
     if check_overdue_items(current_user):
         flash('You have overdue items. Please return them before borrowing new instruments.', 'danger')
@@ -99,6 +104,13 @@ def new_loan():
 @login_required
 def view_qr(qr_code):
     transaction = Transaction.query.filter_by(qr_code=qr_code).first_or_404()
+
+    # --- IDOR Protection ---
+    # CSSD users can view any QR code.
+    # Unit users can only view QR codes for transactions linked to their unit.
+    if current_user.role == 'unit_user' and current_user.unit_id != transaction.unit_id:
+        flash('You are not authorized to view this transaction.', 'danger')
+        return redirect(url_for('main.home'))
 
     # Generate QR code image
     qr = qrcode.QRCode(
@@ -229,6 +241,7 @@ def dashboard():
 
 @main.route("/distribute/new", methods=['GET', 'POST'])
 @login_required
+@cssd_required
 def new_distribution():
     form = DistributionForm()
     if form.validate_on_submit():
